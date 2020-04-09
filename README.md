@@ -1,4 +1,9 @@
+# Twitter Top Links
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+
+## Requirements
+- local `.env` -- see `now.json` to see env variables needed
+- a running backendserver, see [Twitter Top Links Server](https://github.com/thewrenchess/twitter-top-links-server.git)
 
 ## Available Scripts
 
