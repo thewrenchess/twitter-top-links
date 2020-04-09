@@ -111,7 +111,7 @@ const Home = () => {
 
   useEffect(() => {
     const filter_tweets = (search_query, location_filter) => {
-      let _filtered_tweets
+      let _filtered_tweets = []
   
       if (search_query) {
         _filtered_tweets = tweets.filter(tweet => {
@@ -296,7 +296,7 @@ const Home = () => {
               }
               {
                 top_linkers.length ? list_fragment(
-                  'Top 10 Shared Domains',
+                  'Top 10 Link Sharer',
                   top_linkers,
                   '@'
                 ) : ''
