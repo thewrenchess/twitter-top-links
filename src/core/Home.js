@@ -22,10 +22,11 @@ const Home = () => {
     'fontSize': '100px'
   }
 
+  const [is_loading, set_is_loading] = useState(false)
   const [user, set_user] = useState(is_signed_in())
   const [tweets, set_tweets] = useState([])
   const [filtered_tweets, set_filtered_tweets] = useState([])
-  const [is_loading, set_is_loading] = useState(false)
+  const [search_query, set_search_query] = useState('')
 
   const siginin = (event) => {
     event.preventDefault()
@@ -43,6 +44,11 @@ const Home = () => {
     event.preventDefault()
     set_user(null)
     sign_out()
+  }
+
+  const handle_search_query_change = () => event => {
+    const search_query = event.target.value
+    set_search_query(search_query)
   }
 
   useEffect(() => {
@@ -63,7 +69,7 @@ const Home = () => {
           } = data
           const _tweets = sort_tweets(tweet_array)
           set_tweets(_tweets)
-          console.log(_tweets)
+          console.log(_tweets[0])
           set_is_loading(false)
         })
         .catch(err => console.log(err))
@@ -71,8 +77,24 @@ const Home = () => {
   }, [user])
 
   useEffect(() => {
-    set_filtered_tweets(tweets)
-  }, [tweets])
+    if (search_query) {
+      const filtered_tweets = tweets.filter(tweet => {
+        const query_lowercase = search_query.toLowerCase()
+        const location = tweet.location || ''
+        const hashtags = tweet.hashtags || []
+
+        const has_matching_string = (target) => {
+          return target.toLowerCase().includes(query_lowercase)
+        }
+
+        return has_matching_string(location)
+          || hashtags.some(hashtag => has_matching_string(hashtag))
+      })
+      set_filtered_tweets(filtered_tweets)
+    } else {
+      set_filtered_tweets(tweets)
+    }
+  }, [tweets, search_query])
 
   return (
     <Layout
@@ -106,10 +128,21 @@ const Home = () => {
               }
             </div>
             <div className='col-md-4'>
-            <TwitterTimelineEmbed
-              sourceType="profile"
-              userId={ user.user_id }
-              options={{ height: 400 }} />
+              <form>
+                <div className='form-group'>
+                  <input
+                    onChange={ handle_search_query_change() }
+                    type='text'
+                    className='form-control'
+                    placeholder='Search location and hashtags'
+                  />
+                </div>
+              </form>
+              <TwitterTimelineEmbed
+                sourceType="profile"
+                userId={ user.user_id }
+                options={{ height: 400 }}
+              />
               <button
                 onClick={ signout }
                 className='btn btn-block btn-social btn-twitter text-center'
