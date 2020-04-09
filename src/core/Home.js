@@ -56,8 +56,7 @@ const Home = () => {
   }
 
   const handle_location_change = () => event => {
-    event.preventDefault()
-    const _location_filter = event.target.value
+    const _location_filter = event.target.value || ''
     set_location_filter(_location_filter)
   }
 
@@ -264,7 +263,9 @@ const Home = () => {
                   onChange={ handle_location_change() }
                   className='form-control'
                 >
-                  <option value=''>Click to Choose Location</option>
+                  <option selected>
+                    Click to Choose Location
+                  </option>
                   {
                     locations.map((location, index) => (
                       <option
