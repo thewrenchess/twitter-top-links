@@ -102,7 +102,9 @@ const Home = () => {
 
           const _tweets = sort_tweets(tweet_array)
           set_tweets(_tweets)
-          set_is_loading(false)
+          setTimeout(() => {
+            set_is_loading(false)
+          }, 1000)
         })
         .catch(err => console.log(err))
     }
@@ -132,9 +134,9 @@ const Home = () => {
 
     if (search_query || location_filter) {
       const _filtered_tweets = filter_tweets(search_query, location_filter)
-      set_filtered_tweets(_filtered_tweets)
+      set_filtered_tweets(_filtered_tweets.slice(0, 100))
     } else {
-      set_filtered_tweets(tweets)
+      set_filtered_tweets(tweets.slice(0, 100))
     }
   }, [tweets, search_query, location_filter])
 
@@ -241,12 +243,19 @@ const Home = () => {
                     style={ cog_style }
                   />
                 ) : (
-                  filtered_tweets.map(tweet => (
-                    <TwitterTweetEmbed
-                      key={ tweet.tweet_id }
-                      tweetId={ tweet.tweet_id }
-                    />
-                  ))
+                  <Fragment>
+                  <h5>
+                    Most Recent 100 Links Tweeted
+                  </h5>
+                  {
+                    filtered_tweets.map(tweet => (
+                      <TwitterTweetEmbed
+                        key={ tweet.tweet_id }
+                        tweetId={ tweet.tweet_id }
+                      />
+                    ))
+                  }
+                  </Fragment>
                 )
               }
             </div>
