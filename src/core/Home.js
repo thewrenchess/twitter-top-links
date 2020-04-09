@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, Fragment } from 'react'
 import Layout from './Layout'
 import {
   TwitterTimelineEmbed,
@@ -14,7 +14,7 @@ import '../assets/bootstrap-social.css'
 
 const Home = () => {
   const feed_window_style = {
-    height: `${window.innerHeight - 200}px`,
+    height: `${window.outerHeight - 220}px`,
     overflow: 'scroll'
   }
   const cog_style = {
@@ -29,6 +29,8 @@ const Home = () => {
   const [locations, set_locations] = useState([])
   const [search_query, set_search_query] = useState('')
   const [location_filter, set_location_filter] = useState('')
+  const [top_domains, set_top_domains] = useState([])
+  const [top_linkers, set_top_linkers] = useState([])
 
   const siginin = (event) => {
     event.preventDefault()
@@ -58,6 +60,25 @@ const Home = () => {
     set_location_filter(_location_filter)
   }
 
+  const list_fragment = (title, item_array, item_prefix) => (
+    <Fragment>
+      <h5 className='mt-3'>
+        { title }
+      </h5>
+      <ol>
+        {
+          item_array.map((item, index) => (
+            <li
+              key={ index }
+            >
+              { item_prefix }{ item }
+            </li>
+          ))
+        }
+      </ol>
+    </Fragment>
+  )
+
   useEffect(() => {
     const sort_tweets = (tweets) => {
       return tweets.sort((a, b) => {
@@ -67,14 +88,6 @@ const Home = () => {
       })
     }
 
-    const get_location_set = () => {
-      const location_array = filtered_tweets
-        .filter(tweet => !!tweet.location)
-        .map(tweet => tweet.location)
-      const location_set = new Set(location_array)
-      return [...location_set]
-    }
-
     if (user) {
       set_is_loading(true)
       get_tweets(user.user_id)
@@ -82,11 +95,13 @@ const Home = () => {
           const {
             tweet_array
           } = data
+
+          if (!tweet_array) {
+            return
+          }
+
           const _tweets = sort_tweets(tweet_array)
           set_tweets(_tweets)
-          console.log(_tweets[0])
-          const _locations = get_location_set(tweet_array)
-          set_locations(_locations)
           set_is_loading(false)
         })
         .catch(err => console.log(err))
@@ -121,6 +136,87 @@ const Home = () => {
       set_filtered_tweets(tweets)
     }
   }, [tweets, search_query, location_filter])
+
+  useEffect(() => {
+    const get_domain_obj_array = () => {
+      const LINK_REGEX = /^((http[s]?|ftp):\/)?\/?([^:\/\s]+)\/?/
+      const domain_obj_array = []
+
+      tweets.forEach(tweet => {
+        const {
+          screen_name,
+          urls
+        } = tweet
+
+        urls.forEach(url => {
+          const domain = (url.match(LINK_REGEX))[3]
+          if (domain) {
+            domain_obj_array.push({
+              screen_name,
+              domain
+            })
+          }
+        })
+      })
+
+      return domain_obj_array
+    }
+
+    const sort_obj_by_count = (obj) => {
+      return Object.entries(obj)
+      .sort((a, b) => b[1] - a[1])
+      .map(entry => entry[0])
+      .slice(0, 10)
+    }
+
+    const get_top_10_domains = (domain_obj_array) => {
+      const domain_count_obj = domain_obj_array
+        .reduce((_domain_count_obj, domain_obj) => {
+          const domain = domain_obj.domain
+          if (_domain_count_obj[domain]) {
+            _domain_count_obj[domain] += 1
+          } else {
+            _domain_count_obj[domain] += 1
+          }
+          return _domain_count_obj
+        }, {})
+      
+      return sort_obj_by_count(domain_count_obj)
+    }
+
+    const get_top_10_linkers = (domain_obj_array) => {
+      const linker_count_obj = domain_obj_array
+        .reduce((_linker_count_obj, domain_obj) => {
+          const screen_name = domain_obj.screen_name
+          if (_linker_count_obj[screen_name]) {
+            _linker_count_obj[screen_name] += 1
+          } else {
+            _linker_count_obj[screen_name] = 1
+          }
+          return _linker_count_obj
+        }, {})
+      
+      return sort_obj_by_count(linker_count_obj)
+    }
+
+    const domain_obj_array = get_domain_obj_array()
+    const _top_domains = get_top_10_domains(domain_obj_array)
+    set_top_domains(_top_domains)
+    const _top_linkers = get_top_10_linkers(domain_obj_array)
+    set_top_linkers(_top_linkers)
+  }, [tweets])
+
+  useEffect(() => {
+    const get_location_set = () => {
+      const location_array = filtered_tweets
+        .filter(tweet => !!tweet.location)
+        .map(tweet => tweet.location)
+      const location_set = new Set(location_array)
+      return [...location_set]
+    }
+    const _locations = get_location_set()
+    set_locations(_locations)
+  }, [filtered_tweets])
 
   return (
     <Layout
@@ -191,6 +287,19 @@ const Home = () => {
               >
                 Sign out from Twitter
               </button>
+              {
+                top_domains.length ? list_fragment(
+                  'Top 10 Shared Domains',
+                  top_domains
+                ) : ''
+              }
+              {
+                top_linkers.length ? list_fragment(
+                  'Top 10 Shared Domains',
+                  top_linkers,
+                  '@'
+                ) : ''
+              }
             </div>
           </div>
         ) : (
