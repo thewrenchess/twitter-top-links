@@ -111,10 +111,10 @@ const Home = () => {
 
   useEffect(() => {
     const filter_tweets = (search_query, location_filter) => {
-      let _filtered_tweets = []
+      let _filtered_tweets = [...tweets]
   
       if (search_query) {
-        _filtered_tweets = tweets.filter(tweet => {
+        _filtered_tweets = _filtered_tweets.filter(tweet => {
           const hashtags = tweet.hashtags || []
   
           return hashtags.some(hashtag => {
