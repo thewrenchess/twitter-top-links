@@ -79,16 +79,11 @@ const Home = () => {
   useEffect(() => {
     if (search_query) {
       const filtered_tweets = tweets.filter(tweet => {
-        const query_lowercase = search_query.toLowerCase()
-        const location = tweet.location || ''
         const hashtags = tweet.hashtags || []
 
-        const has_matching_string = (target) => {
-          return target.toLowerCase().includes(query_lowercase)
-        }
-
-        return has_matching_string(location)
-          || hashtags.some(hashtag => has_matching_string(hashtag))
+        return hashtags.some(hashtag => {
+          return hashtag.toLowerCase().includes(search_query.toLowerCase())
+        })
       })
       set_filtered_tweets(filtered_tweets)
     } else {
@@ -134,7 +129,7 @@ const Home = () => {
                     onChange={ handle_search_query_change() }
                     type='text'
                     className='form-control'
-                    placeholder='Search location and hashtags'
+                    placeholder='Search hashtags'
                   />
                 </div>
               </form>
