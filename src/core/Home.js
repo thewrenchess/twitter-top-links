@@ -23,6 +23,7 @@ const Home = () => {
   }
 
   const [is_loading, set_is_loading] = useState(false)
+  const [has_error, set_has_error] = useState(false)
   const [user, set_user] = useState(is_signed_in())
   const [tweets, set_tweets] = useState([])
   const [filtered_tweets, set_filtered_tweets] = useState([])
@@ -106,7 +107,10 @@ const Home = () => {
             set_is_loading(false)
           }, 1000)
         })
-        .catch(err => console.log(err))
+        .catch(err => {
+          console.log(err)
+          set_has_error(true)
+        })
     }
   }, [user])
 
@@ -243,19 +247,23 @@ const Home = () => {
                     style={ cog_style }
                   />
                 ) : (
-                  <Fragment>
-                  <h5>
-                    Most Recent 100 Links Tweeted
-                  </h5>
-                  {
-                    filtered_tweets.map(tweet => (
-                      <TwitterTweetEmbed
-                        key={ tweet.tweet_id }
-                        tweetId={ tweet.tweet_id }
-                      />
-                    ))
-                  }
-                  </Fragment>
+                  has_error ? (
+                    <h5>First loads are always heavy, please refresh your page.</h5>
+                  ) :(
+                    <Fragment>
+                    <h5>
+                      Most Recent 100 Links Tweeted
+                    </h5>
+                    {
+                      filtered_tweets.map(tweet => (
+                        <TwitterTweetEmbed
+                          key={ tweet.tweet_id }
+                          tweetId={ tweet.tweet_id }
+                        />
+                      ))
+                    }
+                    </Fragment>
+                  )
                 )
               }
             </div>
