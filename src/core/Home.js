@@ -123,6 +123,7 @@ const Home = () => {
       }
 
       if (location_filter) {
+        console.log(location_filter)
         _filtered_tweets = _filtered_tweets.filter(tweet => tweet.location === location_filter)
       }
 
@@ -262,8 +263,9 @@ const Home = () => {
                 <select
                   onChange={ handle_location_change() }
                   className='form-control'
+                  value={ location_filter }
                 >
-                  <option selected>
+                  <option value=''>
                     Click to Choose Location
                   </option>
                   {
