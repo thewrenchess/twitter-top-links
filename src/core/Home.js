@@ -138,9 +138,9 @@ const Home = () => {
 
     if (search_query || location_filter) {
       const _filtered_tweets = filter_tweets(search_query, location_filter)
-      set_filtered_tweets(_filtered_tweets.slice(0, 100))
+      set_filtered_tweets(_filtered_tweets.slice(0, 50))
     } else {
-      set_filtered_tweets(tweets.slice(0, 100))
+      set_filtered_tweets(tweets.slice(0, 50))
     }
   }, [tweets, search_query, location_filter])
 
@@ -249,19 +249,19 @@ const Home = () => {
                 ) : (
                   has_error ? (
                     <h5>First loads are always heavy, please refresh your page.</h5>
-                  ) :(
+                  ) : (
                     <Fragment>
-                    <h5>
-                      Most Recent 100 Links Tweeted
-                    </h5>
-                    {
-                      filtered_tweets.map(tweet => (
-                        <TwitterTweetEmbed
-                          key={ tweet.tweet_id }
-                          tweetId={ tweet.tweet_id }
-                        />
-                      ))
-                    }
+                      <h5>
+                        Most Recent 50 Links Tweeted
+                      </h5>
+                      {
+                        filtered_tweets.map(tweet => (
+                          <TwitterTweetEmbed
+                            key={ tweet.tweet_id }
+                            tweetId={ tweet.tweet_id }
+                          />
+                        ))
+                      }
                     </Fragment>
                   )
                 )
