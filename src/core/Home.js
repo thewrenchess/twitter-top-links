@@ -103,9 +103,7 @@ const Home = () => {
 
           const _tweets = sort_tweets(tweet_array)
           set_tweets(_tweets)
-          setTimeout(() => {
-            set_is_loading(false)
-          }, 1000)
+          set_is_loading(false)
         })
         .catch(err => {
           console.log(err)
@@ -255,9 +253,9 @@ const Home = () => {
                         Most Recent 50 Links Tweeted
                       </h5>
                       {
-                        filtered_tweets.map(tweet => (
+                        filtered_tweets.map((tweet, index) => (
                           <TwitterTweetEmbed
-                            key={ tweet.tweet_id }
+                            key={ index }
                             tweetId={ tweet.tweet_id }
                           />
                         ))
