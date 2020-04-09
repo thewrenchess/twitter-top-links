@@ -26,7 +26,9 @@ const Home = () => {
   const [user, set_user] = useState(is_signed_in())
   const [tweets, set_tweets] = useState([])
   const [filtered_tweets, set_filtered_tweets] = useState([])
+  const [locations, set_locations] = useState([])
   const [search_query, set_search_query] = useState('')
+  const [location_filter, set_location_filter] = useState('')
 
   const siginin = (event) => {
     event.preventDefault()
@@ -47,8 +49,13 @@ const Home = () => {
   }
 
   const handle_search_query_change = () => event => {
-    const search_query = event.target.value
-    set_search_query(search_query)
+    const _search_query = event.target.value
+    set_search_query(_search_query)
+  }
+
+  const handle_location_change = () => event => {
+    const _location_filter = event.target.value
+    set_location_filter(_location_filter)
   }
 
   useEffect(() => {
@@ -58,6 +65,14 @@ const Home = () => {
         const b_created_at = new Date(b.tweet_created_at)
         return b_created_at - a_created_at
       })
+    }
+
+    const get_location_set = () => {
+      const location_array = filtered_tweets
+        .filter(tweet => !!tweet.location)
+        .map(tweet => tweet.location)
+      const location_set = new Set(location_array)
+      return [...location_set]
     }
 
     if (user) {
@@ -70,6 +85,8 @@ const Home = () => {
           const _tweets = sort_tweets(tweet_array)
           set_tweets(_tweets)
           console.log(_tweets[0])
+          const _locations = get_location_set(tweet_array)
+          set_locations(_locations)
           set_is_loading(false)
         })
         .catch(err => console.log(err))
@@ -77,19 +94,33 @@ const Home = () => {
   }, [user])
 
   useEffect(() => {
-    if (search_query) {
-      const filtered_tweets = tweets.filter(tweet => {
-        const hashtags = tweet.hashtags || []
-
-        return hashtags.some(hashtag => {
-          return hashtag.toLowerCase().includes(search_query.toLowerCase())
+    const filter_tweets = (search_query, location_filter) => {
+      let _filtered_tweets
+  
+      if (search_query) {
+        _filtered_tweets = tweets.filter(tweet => {
+          const hashtags = tweet.hashtags || []
+  
+          return hashtags.some(hashtag => {
+            return hashtag.toLowerCase().includes(search_query.toLowerCase())
+          })
         })
-      })
-      set_filtered_tweets(filtered_tweets)
+      }
+
+      if (location_filter) {
+        _filtered_tweets = _filtered_tweets.filter(tweet => tweet.location === location_filter)
+      }
+
+      return _filtered_tweets
+    }
+
+    if (search_query || location_filter) {
+      const _filtered_tweets = filter_tweets(search_query, location_filter)
+      set_filtered_tweets(_filtered_tweets)
     } else {
       set_filtered_tweets(tweets)
     }
-  }, [tweets, search_query])
+  }, [tweets, search_query, location_filter])
 
   return (
     <Layout
@@ -132,6 +163,22 @@ const Home = () => {
                     placeholder='Search hashtags'
                   />
                 </div>
+                <select
+                  onChange={ handle_location_change() }
+                  className='form-control'
+                >
+                  <option value=''>Click to Choose Location</option>
+                  {
+                    locations.map((location, index) => (
+                      <option
+                        key={ index }
+                        value={ location }
+                      >
+                        { location }
+                      </option>
+                    ))
+                  }
+                </select>
               </form>
               <TwitterTimelineEmbed
                 sourceType="profile"
