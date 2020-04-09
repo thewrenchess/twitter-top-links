@@ -56,6 +56,7 @@ const Home = () => {
   }
 
   const handle_location_change = () => event => {
+    event.preventDefault()
     const _location_filter = event.target.value
     set_location_filter(_location_filter)
   }
